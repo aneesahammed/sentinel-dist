@@ -1,0 +1,1076 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sentinel — Error tracking that works with your existing logs</title>
+    <meta
+      name="description"
+      content="Sentinel reads your stdout and stderr. No SDK, no instrumentation, no cloud. Pipe your logs in — it groups, deduplicates, and triages every error across all your services."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0e1117;
+        --bg-raised: #161b22;
+        --bg-code: #1c2128;
+        --border: #30363d;
+        --border-subtle: #21262d;
+        --text: #e6edf3;
+        --text-muted: #7d8590;
+        --text-dim: #484f58;
+        --accent: #f59e0b;
+        --accent-dim: #78491a;
+        --green: #3fb950;
+        --red: #f85149;
+        --blue: #58a6ff;
+        --mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+        --sans: "Inter", system-ui, -apple-system, sans-serif;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      /* ── NAV ───────────────────────────────────────── */
+      nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(14, 17, 23, 0.92);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border-subtle);
+        padding: 0 2rem;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--mono);
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .nav-logo-mark {
+        width: 20px;
+        height: 20px;
+        border: 1.5px solid var(--accent);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .nav-logo-mark svg {
+        width: 11px;
+        height: 11px;
+      }
+
+      .nav-wordmark {
+        color: var(--text);
+      }
+      .nav-wordmark span {
+        color: var(--accent);
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+
+      .nav-links a {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        transition: color 0.15s;
+      }
+
+      .nav-links a:hover {
+        color: var(--text);
+      }
+
+      .btn-nav {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--text) !important;
+        background: var(--bg-raised);
+        border: 1px solid var(--border);
+        padding: 0.375rem 0.875rem;
+        border-radius: 6px;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+
+      .btn-nav:hover {
+        border-color: var(--text-muted);
+        background: #1e242c;
+      }
+
+      /* ── LAYOUT ────────────────────────────────────── */
+      .container {
+        max-width: 960px;
+        margin: 0 auto;
+        padding-left: 2rem;
+        padding-right: 2rem;
+      }
+
+      section {
+        padding: 5rem 0;
+      }
+
+      /* ── HERO ──────────────────────────────────────── */
+      .hero {
+        padding: 6rem 0 4rem;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .hero-inner {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--accent);
+        background: rgba(245, 158, 11, 0.08);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        padding: 0.25rem 0.625rem;
+        border-radius: 100px;
+        margin-bottom: 1.75rem;
+      }
+
+      .badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex-shrink: 0;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 5vw, 3.125rem);
+        font-weight: 600;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        color: var(--text);
+        max-width: 720px;
+        margin-bottom: 1.25rem;
+      }
+
+      h1 em {
+        font-style: normal;
+        color: var(--accent);
+      }
+
+      .hero-sub {
+        font-size: 1.0625rem;
+        color: var(--text-muted);
+        max-width: 580px;
+        line-height: 1.65;
+        margin-bottom: 2rem;
+      }
+
+      .hero-ctas {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 3.5rem;
+      }
+
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: #0e1117;
+        background: var(--accent);
+        padding: 0.625rem 1.25rem;
+        border-radius: 6px;
+        transition:
+          background 0.15s,
+          opacity 0.15s;
+      }
+
+      .btn-primary:hover {
+        background: #d97706;
+      }
+
+      .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        background: transparent;
+        border: 1px solid var(--border);
+        padding: 0.625rem 1.25rem;
+        border-radius: 6px;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
+      }
+
+      .btn-secondary:hover {
+        border-color: var(--text-muted);
+        color: var(--text);
+      }
+
+      /* ── TERMINAL ──────────────────────────────────── */
+      .terminal {
+        background: var(--bg-code);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        font-family: var(--mono);
+        font-size: 0.8125rem;
+        line-height: 1.7;
+      }
+
+      .terminal-bar {
+        background: #1e2430;
+        border-bottom: 1px solid var(--border);
+        padding: 0.625rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .dot-red {
+        background: #ff5f57;
+      }
+      .dot-yellow {
+        background: #ffbd2e;
+      }
+      .dot-green {
+        background: #28c840;
+      }
+
+      .terminal-title {
+        flex: 1;
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--text-dim);
+      }
+
+      .terminal-body {
+        padding: 1.25rem 1.5rem;
+      }
+
+      .t-prompt {
+        color: var(--text-dim);
+      }
+      .t-cmd {
+        color: var(--text);
+      }
+      .t-green {
+        color: var(--green);
+      }
+      .t-red {
+        color: var(--red);
+      }
+      .t-amber {
+        color: var(--accent);
+      }
+      .t-blue {
+        color: var(--blue);
+      }
+      .t-muted {
+        color: var(--text-muted);
+      }
+      .t-dim {
+        color: var(--text-dim);
+      }
+
+      .t-line {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .t-line + .t-line {
+        margin-top: 0.1rem;
+      }
+      .spacer {
+        margin-top: 0.7rem;
+      }
+
+      .cursor {
+        display: inline-block;
+        width: 8px;
+        height: 1em;
+        background: var(--accent);
+        vertical-align: text-bottom;
+        animation: blink 1.1s step-end infinite;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* ── HOW IT WORKS ──────────────────────────────── */
+      .section-label {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 1rem;
+      }
+
+      h2 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin-bottom: 1rem;
+        line-height: 1.25;
+      }
+
+      .section-intro {
+        font-size: 1rem;
+        color: var(--text-muted);
+        max-width: 560px;
+        margin-bottom: 3rem;
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.5rem;
+      }
+
+      .step {
+        background: var(--bg-raised);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        padding: 1.5rem;
+      }
+
+      .step-num {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--accent);
+        margin-bottom: 0.75rem;
+      }
+
+      .step h3 {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+      }
+
+      .step p {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+
+      .step code {
+        font-family: var(--mono);
+        font-size: 0.8125rem;
+        color: var(--blue);
+        background: rgba(88, 166, 255, 0.07);
+        padding: 0.1em 0.35em;
+        border-radius: 3px;
+      }
+
+      /* ── MODES ─────────────────────────────────────── */
+      .modes-section {
+        border-top: 1px solid var(--border-subtle);
+      }
+
+      .modes-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1px;
+        background: var(--border-subtle);
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .mode {
+        background: var(--bg-raised);
+        padding: 1.75rem;
+      }
+
+      .mode-tag {
+        font-family: var(--mono);
+        font-size: 0.6875rem;
+        font-weight: 500;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        margin-bottom: 0.875rem;
+      }
+
+      .mode h3 {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+      }
+
+      .mode p {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 0.875rem;
+      }
+
+      .mode-cmd {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        background: var(--bg-code);
+        border: 1px solid var(--border-subtle);
+        border-radius: 5px;
+        padding: 0.5rem 0.75rem;
+      }
+
+      .mode-cmd .prompt {
+        color: var(--text-dim);
+      }
+      .mode-cmd .cmd {
+        color: var(--accent);
+      }
+
+      /* ── FEATURES ──────────────────────────────────── */
+      .features-section {
+        border-top: 1px solid var(--border-subtle);
+      }
+
+      .features-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem 3rem;
+      }
+
+      .feature h3 {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        margin-bottom: 0.375rem;
+        color: var(--text);
+      }
+
+      .feature p {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+
+      .feature-icon {
+        font-family: var(--mono);
+        font-size: 0.6875rem;
+        color: var(--accent);
+        margin-bottom: 0.625rem;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+      }
+
+      .feature-icon::before {
+        content: "";
+        display: block;
+        width: 16px;
+        height: 1px;
+        background: var(--accent);
+        opacity: 0.4;
+      }
+
+      /* ── STACK ─────────────────────────────────────── */
+      .stack-section {
+        border-top: 1px solid var(--border-subtle);
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .stack-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+      }
+
+      .stack-item {
+        font-family: var(--mono);
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        background: var(--bg-raised);
+        border: 1px solid var(--border-subtle);
+        padding: 0.375rem 0.875rem;
+        border-radius: 5px;
+      }
+
+      .stack-item span {
+        color: var(--text-dim);
+        margin-left: 0.35rem;
+        font-size: 0.75rem;
+      }
+
+      /* ── CTA ───────────────────────────────────────── */
+      .cta-section {
+        text-align: center;
+        padding: 5rem 0;
+      }
+
+      .cta-section h2 {
+        margin-bottom: 1rem;
+      }
+
+      .cta-section p {
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+        font-size: 1rem;
+      }
+
+      .cta-install {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        background: var(--bg-code);
+        border: 1px solid var(--border);
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2.5rem;
+        letter-spacing: 0.01em;
+      }
+
+      .cta-install .dollar {
+        color: var(--text-dim);
+        margin-right: 0.5rem;
+      }
+
+      .cta-buttons {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      /* ── FOOTER ────────────────────────────────────── */
+      footer {
+        border-top: 1px solid var(--border-subtle);
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .footer-left {
+        font-size: 0.8125rem;
+        color: var(--text-dim);
+      }
+
+      .footer-left a {
+        color: var(--text-muted);
+        transition: color 0.15s;
+      }
+
+      .footer-left a:hover {
+        color: var(--text);
+      }
+
+      .footer-right {
+        display: flex;
+        gap: 1.25rem;
+      }
+
+      .footer-right a {
+        font-size: 0.8125rem;
+        color: var(--text-dim);
+        transition: color 0.15s;
+      }
+
+      .footer-right a:hover {
+        color: var(--text-muted);
+      }
+
+      /* ── RESPONSIVE ────────────────────────────────── */
+      @media (max-width: 768px) {
+        section {
+          padding: 3.5rem 0;
+        }
+        .hero {
+          padding: 4rem 0 3rem;
+        }
+
+        h1 {
+          font-size: 1.875rem;
+        }
+
+        .steps {
+          grid-template-columns: 1fr;
+        }
+
+        .modes-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .features-list {
+          grid-template-columns: 1fr;
+        }
+
+        nav {
+          padding: 0 1rem;
+        }
+        .container {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+        .hero-inner {
+          padding: 0 1rem;
+        }
+        footer {
+          padding: 1.5rem 1rem;
+        }
+
+        .nav-links a:not(.btn-nav) {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAV -->
+    <nav>
+      <a href="/" class="nav-logo" aria-label="Sentinel home">
+        <div class="nav-logo-mark">
+          <svg
+            viewBox="0 0 11 11"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5.5 1L9.5 3.25V7.75L5.5 10L1.5 7.75V3.25L5.5 1Z"
+              stroke="#f59e0b"
+              stroke-width="1.2"
+              stroke-linejoin="round"
+            />
+            <circle cx="5.5" cy="5.5" r="1.25" fill="#f59e0b" />
+          </svg>
+        </div>
+        <span class="nav-wordmark">sentinel<span>.</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="#how-it-works">How it works</a>
+        <a href="#features">Features</a>
+        <a
+          href="https://github.com/aneesahammed/sentinel-dist"
+          target="_blank"
+          rel="noopener"
+          class="btn-nav"
+        >
+          GitHub ↗
+        </a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="badge">
+          MIT License · Single Binary · No Instrumentation
+        </div>
+
+        <h1>Error tracking that works with your <em>existing logs</em></h1>
+
+        <p class="hero-sub">
+          Sentinel reads your stdout and stderr — no SDK, no code changes, no
+          cloud. Pipe it in and it groups, fingerprints, and triages every error
+          across all your services.
+        </p>
+
+        <div class="hero-ctas">
+          <a
+            href="https://github.com/aneesahammed/sentinel-dist"
+            class="btn-primary"
+            target="_blank"
+            rel="noopener"
+          >
+            Get Sentinel ↗
+          </a>
+          <a href="#how-it-works" class="btn-secondary"> See how it works </a>
+        </div>
+
+        <!-- Terminal demo -->
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+            <div class="terminal-title">bash</div>
+          </div>
+          <div class="terminal-body">
+            <div class="t-line">
+              <span class="t-prompt">$</span>
+              <span class="t-cmd">docker logs -f api | sentinel stdin</span>
+            </div>
+            <div class="t-line spacer">
+              <span class="t-green">✓</span>
+              <span class="t-muted"
+                >connected · sentinel.db · project: api</span
+              >
+            </div>
+            <div class="t-line spacer">
+              <span class="t-red">●</span>
+              <span class="t-cmd">error</span>
+              <span class="t-muted"
+                >TypeError: Cannot read properties of undefined (reading
+                'id')</span
+              >
+            </div>
+            <div class="t-line">
+              <span class="t-dim">│</span>
+              <span class="t-dim"
+                >fingerprint a4f1b2c · 3rd occurrence · last seen 2m ago</span
+              >
+            </div>
+            <div class="t-line">
+              <span class="t-dim">│</span>
+              <span class="t-muted"
+                >triage: null check missing on req.body.user in auth
+                handler</span
+              >
+            </div>
+            <div class="t-line spacer">
+              <span class="t-amber">●</span>
+              <span class="t-cmd">warn</span>
+              <span class="t-muted"
+                >Database pool exhausted (14/15 connections)</span
+              >
+            </div>
+            <div class="t-line">
+              <span class="t-dim">│</span>
+              <span class="t-dim"
+                >fingerprint 9c3d7e2 · new issue · first seen now</span
+              >
+            </div>
+            <div class="t-line">
+              <span class="t-dim">│</span>
+              <span class="t-muted"
+                >triage: connection leak likely — check for unclosed
+                queries</span
+              >
+            </div>
+            <div class="t-line spacer">
+              <span class="t-prompt">$</span>
+              <span class="t-cmd">sentinel ui</span>
+            </div>
+            <div class="t-line">
+              <span class="t-green">✓</span>
+              <span class="t-muted">dashboard → </span
+              ><span class="t-blue">http://localhost:4040</span>
+              <span class="cursor"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <section id="how-it-works" class="container">
+      <div class="section-label">How it works</div>
+      <h2>Pipe in. Get signal.</h2>
+      <p class="section-intro">
+        Three steps. No account, no config file, no YAML.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Point it at your logs</h3>
+          <p>
+            Pipe stdin, tail files with <code>watch ./logs/*.log</code>, or wrap
+            a process with <code>run -- your_command</code>. Sentinel reads
+            whatever your app already emits.
+          </p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Fingerprints, not raw lines</h3>
+          <p>
+            Multiline stack traces are grouped. UUIDs, IDs, and timestamps are
+            stripped before hashing so the same error from different requests
+            lands in the same bucket, every time.
+          </p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Triage and track</h3>
+          <p>
+            Each new fingerprint is triaged — heuristically offline, or via a
+            local LLM if you have Ollama running. Mark issues as investigating,
+            resolved, or suppressed. Regressions are auto-flagged.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- INGESTION MODES -->
+    <section class="modes-section container">
+      <div class="section-label">Ingestion modes</div>
+      <h2>Works wherever your logs live</h2>
+      <p class="section-intro">Three ingestion modes, one binary.</p>
+      <div class="modes-grid">
+        <div class="mode">
+          <div class="mode-tag">stdin</div>
+          <h3>Pipe from anything</h3>
+          <p>
+            Pipe from Docker, journald, your build system, CI output — any
+            process that writes to stdout.
+          </p>
+          <div class="mode-cmd">
+            <span class="prompt">$ </span
+            ><span class="cmd">docker logs -f api | sentinel stdin</span>
+          </div>
+        </div>
+        <div class="mode">
+          <div class="mode-tag">watch</div>
+          <h3>Tail log files</h3>
+          <p>
+            Glob patterns, seek-based offset tracking, and automatic rotation
+            detection for file-based logs.
+          </p>
+          <div class="mode-cmd">
+            <span class="prompt">$ </span
+            ><span class="cmd">sentinel watch ./logs/*.log</span>
+          </div>
+        </div>
+        <div class="mode">
+          <div class="mode-tag">run</div>
+          <h3>Wrap your dev server</h3>
+          <p>
+            Captures stdout and stderr from a child process. Tags the session
+            with your git branch and commit.
+          </p>
+          <div class="mode-cmd">
+            <span class="prompt">$ </span
+            ><span class="cmd">sentinel run -- npm run dev</span>
+          </div>
+        </div>
+        <div class="mode">
+          <div class="mode-tag">ui</div>
+          <h3>Local web dashboard</h3>
+          <p>
+            Filter by project, severity, status. View occurrence timelines,
+            breadcrumbs, and stack frames. Real-time via SSE.
+          </p>
+          <div class="mode-cmd">
+            <span class="prompt">$ </span
+            ><span class="cmd">sentinel ui → localhost:4040</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="features-section container">
+      <div class="section-label">Features</div>
+      <h2>Built for engineers, not ops teams</h2>
+      <p class="section-intro">Everything you need. Nothing you don't.</p>
+
+      <div class="features-list">
+        <div class="feature">
+          <div class="feature-icon">fingerprinting</div>
+          <h3>Stable fingerprints</h3>
+          <p>
+            SHA-256 over a normalized message and top-3 stack frames. UUIDs,
+            IDs, timestamps, and paths are stripped first — so the same bug gets
+            the same fingerprint across every run.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">multi-language</div>
+          <h3>Parses 7 languages</h3>
+          <p>
+            Structured stack trace parsing for Python, Go, Node.js, Java,
+            Kotlin, .NET, and Rust. Multiline exceptions are grouped
+            automatically — no config required.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">multi-project</div>
+          <h3>Multi-project scoping</h3>
+          <p>
+            Same error in your billing service and auth service stays separate.
+            Use <code>--project</code> to scope ingestion; the dashboard has a
+            project filter built in.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">llm triage</div>
+          <h3>Optional LLM triage</h3>
+          <p>
+            Works with Ollama, LM Studio, or any OpenAI-compatible endpoint.
+            Falls back to heuristic automatically. Pass
+            <code>--offline</code> to skip LLM entirely — zero latency, zero
+            calls.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">regression</div>
+          <h3>Regression detection</h3>
+          <p>
+            When a resolved issue reappears after a 10-minute quiet period, it's
+            automatically flagged as a regression. Status history tracks every
+            transition.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">breadcrumbs</div>
+          <h3>Breadcrumb context</h3>
+          <p>
+            The 50 log lines preceding each error are captured and stored with
+            the occurrence. You see what led up to it, not just the exception
+            itself.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">otlp</div>
+          <h3>OTLP trace correlation</h3>
+          <p>
+            Built-in OpenTelemetry HTTP receiver. Traces are correlated with
+            error events and shown as a span waterfall in the UI — no external
+            collector needed.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">local-first</div>
+          <h3>Everything stays local</h3>
+          <p>
+            SQLite with WAL mode. API keys encrypted with AES-256-GCM. Data
+            never leaves your machine. Self-update pulls from GitHub with
+            SHA-256 checksum verification.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- STACK -->
+    <section class="stack-section container">
+      <div class="section-label">Under the hood</div>
+      <h2>Deliberately minimal stack</h2>
+      <p class="section-intro">
+        Single binary. No runtime, no daemon, no background services. Drop it in
+        your PATH and it works.
+      </p>
+      <div class="stack-row">
+        <div class="stack-item">Go 1.23 <span>language</span></div>
+        <div class="stack-item">SQLite + WAL <span>storage</span></div>
+        <div class="stack-item">Pure Go SQLite <span>no CGO</span></div>
+        <div class="stack-item">Cobra <span>CLI</span></div>
+        <div class="stack-item">oat.ink <span>UI library</span></div>
+        <div class="stack-item">go:embed <span>web UI</span></div>
+        <div class="stack-item">OpenTelemetry <span>traces</span></div>
+        <div class="stack-item">AES-256-GCM <span>secrets</span></div>
+        <div class="stack-item">
+          macOS · Linux · Windows <span>platforms</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section container">
+      <h2>Start in under a minute</h2>
+      <p>
+        Download the binary, add it to your PATH, and pipe your first logs in.
+      </p>
+
+      <div class="cta-install">
+        <span class="dollar">$</span>sentinel run --offline -- npm run dev
+      </div>
+
+      <div class="cta-buttons">
+        <a
+          href="https://github.com/aneesahammed/sentinel-dist"
+          class="btn-primary"
+          target="_blank"
+          rel="noopener"
+        >
+          Download Sentinel ↗
+        </a>
+        <a
+          href="https://github.com/aneesahammed/sentinel-dist"
+          class="btn-secondary"
+          target="_blank"
+          rel="noopener"
+        >
+          View on GitHub
+        </a>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-left">
+        A
+        <a href="https://tinycrafts.ai" target="_blank" rel="noopener"
+          >tinyCrafts</a
+        >
+        tool · Built by
+        <a href="https://anees.xyz" target="_blank" rel="noopener"
+          >Anees Ahammed</a
+        >
+        · Dashboard UI built with <a href="https://oat.ink" target="_blank" rel="noopener">oat.ink</a> ·
+        MIT License
+      </div>
+      <div class="footer-right">
+        <a
+          href="https://github.com/aneesahammed/sentinel-dist"
+          target="_blank"
+          rel="noopener"
+          >GitHub</a
+        >
+        <a href="https://anees.xyz" target="_blank" rel="noopener">Blog</a>
+      </div>
+    </footer>
+  </body>
+</html>
