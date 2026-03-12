@@ -467,19 +467,89 @@
         max-width: 360px;
       }
 
+      .install-shell {
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 100%),
+          var(--bg-code);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow:
+          0 18px 50px rgba(0, 0, 0, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        overflow: hidden;
+      }
+
+      .install-shell-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.8rem 1rem;
+        border-bottom: 1px solid var(--border-subtle);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .install-shell-label {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .copy-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-family: var(--mono);
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 0.42rem 0.72rem;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          color 0.15s,
+          background 0.15s,
+          transform 0.15s;
+      }
+
+      .copy-button:hover {
+        color: var(--text);
+        border-color: rgba(245, 158, 11, 0.5);
+        background: rgba(245, 158, 11, 0.08);
+      }
+
+      .copy-button:focus-visible {
+        outline: 2px solid rgba(245, 158, 11, 0.45);
+        outline-offset: 2px;
+      }
+
+      .copy-button[data-copy-state="copied"] {
+        color: #0e1117;
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+
+      .copy-button svg {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+      }
+
       .install-command {
         display: block;
-        overflow-x: auto;
+        margin: 0;
         font-family: var(--mono);
         font-size: 0.84rem;
-        line-height: 1.7;
+        line-height: 1.8;
         color: var(--text);
-        background: var(--bg-code);
-        border: 1px solid var(--border);
-        border-radius: 10px;
         padding: 1rem 1.15rem;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
-        white-space: nowrap;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .install-command .prompt {
@@ -717,6 +787,11 @@
         border-radius: 8px;
         margin-bottom: 2.5rem;
         letter-spacing: 0.01em;
+        max-width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        text-align: left;
       }
 
       .cta-install .dollar {
@@ -792,6 +867,10 @@
 
         .install-strip-inner {
           grid-template-columns: 1fr;
+        }
+
+        .install-shell-bar {
+          flex-wrap: wrap;
         }
 
         .steps {
@@ -967,14 +1046,42 @@
             <code>sentinel update</code>.
           </p>
         </div>
-        <code class="install-command"
-          ><span class="prompt">$</span
-          ><span class="cmd"
-            >curl -fsSL
-            https://github.com/aneesahammed/sentinel-dist/releases/latest/download/sentinel.sh
-            | bash</span
-          ></code
-        >
+        <div class="install-shell">
+          <div class="install-shell-bar">
+            <span class="install-shell-label">bash</span>
+            <button
+              type="button"
+              class="copy-button"
+              data-copy-value="curl -fsSL https://github.com/aneesahammed/sentinel-dist/releases/latest/download/sentinel.sh | bash"
+              aria-label="Copy install command"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <rect
+                  x="9"
+                  y="9"
+                  width="10"
+                  height="10"
+                  rx="2"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                />
+                <path
+                  d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+              </svg>
+              <span class="copy-label">Copy</span>
+            </button>
+          </div>
+          <pre class="install-command"><span class="prompt">$</span><span class="cmd">curl -fsSL https://github.com/aneesahammed/sentinel-dist/releases/latest/download/sentinel.sh | bash</span></pre>
+        </div>
       </div>
     </section>
 
@@ -1243,5 +1350,54 @@
         <a href="https://anees.xyz" target="_blank" rel="noopener">Blog</a>
       </div>
     </footer>
+    <script>
+      (() => {
+        const copyButtons = document.querySelectorAll(".copy-button[data-copy-value]");
+        if (!copyButtons.length) return;
+
+        const copyText = async (value) => {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(value);
+            return true;
+          }
+
+          const textarea = document.createElement("textarea");
+          textarea.value = value;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "absolute";
+          textarea.style.left = "-9999px";
+          document.body.appendChild(textarea);
+          textarea.select();
+          const ok = document.execCommand("copy");
+          document.body.removeChild(textarea);
+          if (!ok) throw new Error("copy failed");
+          return true;
+        };
+
+        copyButtons.forEach((button) => {
+          const label = button.querySelector(".copy-label");
+          const reset = () => {
+            button.dataset.copyState = "";
+            if (label) label.textContent = "Copy";
+          };
+
+          button.addEventListener("click", async () => {
+            const value = button.dataset.copyValue || "";
+
+            try {
+              await copyText(value);
+              button.dataset.copyState = "copied";
+              if (label) label.textContent = "Copied";
+            } catch (error) {
+              button.dataset.copyState = "";
+              if (label) label.textContent = "Press Cmd/Ctrl+C";
+            }
+
+            window.clearTimeout(button._copyTimer);
+            button._copyTimer = window.setTimeout(reset, 1800);
+          });
+        });
+      })();
+    </script>
   </body>
 </html>
