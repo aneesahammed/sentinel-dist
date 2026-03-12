@@ -9,20 +9,42 @@ Primary use: run your app or tests via `sentinel run -- <command>` to capture lo
 
 Release page: [https://github.com/aneesahammed/sentinel-dist/releases](https://github.com/aneesahammed/sentinel-dist/releases)
 
-## 1) Download the right binary
+## 1) Install in one command
+
+### macOS / Linux
+
+```bash
+curl -fsSL https://github.com/aneesahammed/sentinel-dist/releases/latest/download/sentinel.sh | bash
+```
+
+The installer downloads the latest matching binary from `aneesahammed/sentinel-dist`, verifies `checksums.txt`, installs to a writable bin directory, and leaves future upgrades to `sentinel update`.
+
+Optional:
+
+```bash
+curl -fsSL https://github.com/aneesahammed/sentinel-dist/releases/latest/download/sentinel.sh | \
+  env SENTINEL_INSTALL_DIR="$HOME/bin" bash
+```
+
+### Windows
+
+Download the latest `.exe` from the release page and place it on your PATH.
+
+## 2) Manual binary download (fallback)
 
 From the latest release, download the asset matching your OS/CPU:
 
-| OS | CPU | Asset name pattern |
-|---|---|---|
-| macOS (Apple Silicon) | arm64 | `sentinel_<version>_darwin_arm64` |
-| macOS (Intel) | amd64 | `sentinel_<version>_darwin_amd64` |
-| Linux | amd64 | `sentinel_<version>_linux_amd64` |
-| Windows | amd64 | `sentinel_<version>_windows_amd64.exe` |
+| OS                    | CPU   | Asset name pattern                     |
+| --------------------- | ----- | -------------------------------------- |
+| macOS (Apple Silicon) | arm64 | `sentinel_<version>_darwin_arm64`      |
+| macOS (Intel)         | amd64 | `sentinel_<version>_darwin_amd64`      |
+| Linux                 | amd64 | `sentinel_<version>_linux_amd64`       |
+| Linux                 | arm64 | `sentinel_<version>_linux_arm64`       |
+| Windows               | amd64 | `sentinel_<version>_windows_amd64.exe` |
 
 `<version>` looks like `0.1.0+6`.
 
-## 2) Put Sentinel on PATH (recommended)
+## 3) Put Sentinel on PATH (manual fallback)
 
 ### macOS / Linux
 
@@ -51,14 +73,14 @@ Move-Item "$env:USERPROFILE\Downloads\<downloaded-file>.exe" "$env:USERPROFILE\b
 If Windows SmartScreen appears, click **More info** -> **Run anyway** once.
 If macOS blocks first launch, allow it in **System Settings -> Privacy & Security**.
 
-## 3) Verify install
+## 4) Verify install
 
 ```bash
 sentinel --help
 sentinel check --offline
 ```
 
-## 4) Capture logs/errors from your app
+## 5) Capture logs/errors from your app
 
 Recommended flow:
 
@@ -75,7 +97,7 @@ sentinel run --offline -- python app.py
 
 Why `run` mode: it captures **both stdout and stderr** and starts local trace ingestion automatically (if your app is OTel-instrumented).
 
-## 5) OpenTelemetry note (quick)
+## 6) OpenTelemetry note (quick)
 
 - `sentinel run -- ...` is the easiest path: Sentinel auto-configures OTLP exporter vars for the child process.
 - For `sentinel stdin` / `sentinel watch`, you must configure OTEL manually and include the printed `sentinel.session_id` in `OTEL_RESOURCE_ATTRIBUTES`.
@@ -88,7 +110,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318
 export OTEL_RESOURCE_ATTRIBUTES="service.name=my-service,sentinel.session_id=<session>,sentinel.project=default"
 ```
 
-## 6) Open the UI
+## 7) Open the UI
 
 ```bash
 sentinel ui
@@ -98,7 +120,7 @@ Then open `http://127.0.0.1:4040` (or use `--port` if needed).
 
 ![Sentinel UI](https://github.com/user-attachments/assets/2756d744-b0db-4beb-a6a6-07514e244a10)
 
-## 7) Optional: update later
+## 8) Optional: update later
 
 ```bash
 sentinel update
