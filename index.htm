@@ -479,6 +479,11 @@
         overflow: hidden;
       }
 
+      .install-stack {
+        display: grid;
+        gap: 1rem;
+      }
+
       .install-shell-bar {
         display: flex;
         align-items: center;
@@ -559,6 +564,74 @@
 
       .install-command .cmd {
         color: var(--accent);
+      }
+
+      .windows-install {
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 100%),
+          var(--bg-raised);
+        border: 1px solid var(--border-subtle);
+        border-radius: 14px;
+        padding: 1.05rem 1.15rem 1.15rem;
+      }
+
+      .windows-install-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 0.7rem;
+      }
+
+      .windows-install h3 {
+        font-size: 1rem;
+        margin-bottom: 0.55rem;
+      }
+
+      .windows-install p {
+        color: var(--text-muted);
+        font-size: 0.94rem;
+        line-height: 1.7;
+        margin-bottom: 0.9rem;
+      }
+
+      .install-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 1.8rem;
+        padding: 0.1rem 0.55rem;
+        margin: 0 0.15rem;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text);
+        font-family: var(--mono);
+        font-size: 0.84rem;
+        vertical-align: middle;
+      }
+
+      .install-release-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        color: var(--text);
+        font-family: var(--mono);
+        font-size: 0.82rem;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+        padding-bottom: 0.1rem;
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+      }
+
+      .install-release-link:hover {
+        color: var(--accent);
+        border-color: rgba(245, 158, 11, 0.7);
       }
 
       /* ── HOW IT WORKS ──────────────────────────────── */
@@ -873,6 +946,10 @@
           flex-wrap: wrap;
         }
 
+        .windows-install {
+          padding: 1rem;
+        }
+
         .steps {
           grid-template-columns: 1fr;
         }
@@ -1043,45 +1120,71 @@
           <div class="install-kicker">Quick install</div>
           <h2>Start in under 10 seconds</h2>
           <p>
-            macOS and Linux first install. After that, upgrades are just
+            macOS, Linux, and Git Bash on Windows install in one command. Native
+            Windows starts from the latest release page. After first install,
+            upgrades are just
             <code>sentinel update</code>.
           </p>
         </div>
-        <div class="install-shell">
-          <div class="install-shell-bar">
-            <span class="install-shell-label">bash</span>
-            <button
-              type="button"
-              class="copy-button"
-              data-copy-value="curl -fsSL https://github.com/aneesahammed/sentinel-dist/releases/latest/download/sentinel.sh | bash"
-              aria-label="Copy install command"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
+        <div class="install-stack">
+          <div class="install-shell">
+            <div class="install-shell-bar">
+              <span class="install-shell-label">bash</span>
+              <button
+                type="button"
+                class="copy-button"
+                data-copy-value="curl -fsSL https://github.com/aneesahammed/sentinel-dist/releases/latest/download/sentinel.sh | bash"
+                aria-label="Copy install command"
               >
-                <rect
-                  x="9"
-                  y="9"
-                  width="10"
-                  height="10"
-                  rx="2"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                />
-                <path
-                  d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                />
-              </svg>
-              <span class="copy-label">Copy</span>
-            </button>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <rect
+                    x="9"
+                    y="9"
+                    width="10"
+                    height="10"
+                    rx="2"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+                  <path
+                    d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                <span class="copy-label">Copy</span>
+              </button>
+            </div>
+            <pre
+              class="install-command"
+            ><span class="prompt">$</span><span class="cmd">curl -fsSL https://github.com/aneesahammed/sentinel-dist/releases/latest/download/sentinel.sh | bash</span></pre>
           </div>
-          <pre class="install-command"><span class="prompt">$</span><span class="cmd">curl -fsSL https://github.com/aneesahammed/sentinel-dist/releases/latest/download/sentinel.sh | bash</span></pre>
+
+          <div class="windows-install">
+            <div class="windows-install-label">Windows</div>
+            <h3>Windows install</h3>
+            <p>
+              Using Git Bash, MSYS2, or Cygwin? Run the same command above.
+              Otherwise download the latest
+              <span class="install-pill">.exe</span>
+              from the public release page and place it on your
+              <span class="install-pill">PATH</span>
+            </p>
+            <a
+              href="https://github.com/aneesahammed/sentinel-dist/releases"
+              target="_blank"
+              rel="noopener"
+              class="install-release-link"
+            >
+              Open public releases ↗
+            </a>
+          </div>
         </div>
       </div>
     </section>
@@ -1307,12 +1410,7 @@
       </div>
 
       <div class="cta-buttons">
-        <a
-          href="/docs/"
-          class="btn-primary"
-        >
-          Read the docs
-        </a>
+        <a href="/docs/" class="btn-primary"> Read the docs </a>
         <a
           href="https://github.com/aneesahammed/sentinel-dist"
           class="btn-secondary"
@@ -1352,7 +1450,9 @@
     </footer>
     <script>
       (() => {
-        const copyButtons = document.querySelectorAll(".copy-button[data-copy-value]");
+        const copyButtons = document.querySelectorAll(
+          ".copy-button[data-copy-value]",
+        );
         if (!copyButtons.length) return;
 
         const copyText = async (value) => {
