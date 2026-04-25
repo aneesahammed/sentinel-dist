@@ -7,28 +7,40 @@ Menu</button></div></header><div class=docs-grid><aside class=sidebar id=docs-si
 </a><a class=sidebar-link href=/docs/install/><span>Install</span>
 </a><a class=sidebar-link href=/docs/quickstart/><span>Quick Start</span>
 </a><a class=sidebar-link href=/docs/docker/><span>Docker</span>
+</a><a class=sidebar-link href=/docs/dev/><span>Dev</span>
 </a><a class=sidebar-link href=/docs/commands/><span>Commands</span>
+</a><a class=sidebar-link href=/docs/projects/><span>Projects</span>
 </a><a class=sidebar-link href=/docs/ui/><span>UI</span>
 </a><a class=sidebar-link href=/docs/otel/><span>OpenTelemetry</span>
+</a><a class=sidebar-link href=/docs/troubleshooting/><span>Troubleshooting</span>
 </a><a class=sidebar-link href=/docs/reference/><span>Reference</span></a></nav></div></aside><main class=content-shell><article class="doc doc-home"><header class=doc-header><p class=eyebrow>Local-First Docs</p><h1>Sentinel Documentation</h1><p class=lede>Public documentation for installing Sentinel, ingesting logs, using Docker and traces, and navigating the local UI.</p></header><div class="doc-content prose"><p>Sentinel is a local-first error tracker for development logs. It reads the logs you already have, groups recurring failures into issues, stores them locally in SQLite, and gives you a local UI to inspect what keeps coming back.</p><div class=callout><strong>Start here</strong>
-Install Sentinel, run <code>sentinel docker</code> or <code>sentinel run -- &lt;command></code>, then open <code>sentinel ui</code> when you want to inspect grouped issues and correlated spans.</div><h2 id=what-these-docs-cover>What these docs cover</h2><ul><li>install and upgrades across macOS, Linux, and Windows</li><li>quick start flows for Docker, wrapped commands, stdin, and log files</li><li>Docker auto-discovery and container selection behavior</li><li>the current CLI surface, including traces, projects, status actions, and update flow</li><li>the current UI surface, including Issues, Traces, Settings, and keyboard shortcuts</li><li>OTLP/HTTP trace ingestion and the <code>sentinel.session_id</code> correlation contract</li></ul><h2 id=documentation-map>Documentation map</h2><ul><li><a href=/docs/install/>Install Sentinel</a></li><li><a href=/docs/quickstart/>Run the quick start</a></li><li><a href=/docs/docker/>Use Docker mode</a></li><li><a href=/docs/commands/>Browse command workflows</a></li><li><a href=/docs/ui/>Use the local UI</a></li><li><a href=/docs/otel/>Configure OpenTelemetry</a></li><li><a href=/docs/reference/>Use the full reference</a></li></ul><h2 id=core-workflow>Core workflow</h2><p>For most local development setups:</p><ol><li><a href=/docs/install/>Install Sentinel</a></li><li>If you use Docker, run <code>sentinel docker</code></li><li>If not, use <code>sentinel run -- &lt;command></code>, <code>sentinel stdin</code>, or <code>sentinel watch</code></li><li>Open <code>sentinel ui</code></li><li>Use the <a href=/docs/reference/ui/>UI reference</a> and <a href=/docs/reference/cli/>CLI reference</a> when you need exact behavior</li></ol></div><section class=card-grid aria-label="Documentation sections"><a class=doc-card href=/docs/install/><span class=doc-card-kicker>Install</span>
+Install Sentinel, run <code>sentinel dev</code>, <code>sentinel docker</code>, or <code>sentinel run -- &lt;command></code>, then open <code>sentinel ui</code> when you want to inspect grouped issues and correlated spans.</div><h2 id=what-these-docs-cover>What these docs cover</h2><ul><li>install and upgrades across macOS, Linux, and Windows</li><li>quick start flows for Docker, the supervised dev stack, wrapped commands, stdin, and log files</li><li><code>sentinel dev</code>: a <code>.sentinel.yml</code>-driven supervisor with a terminal UI for your local stack</li><li>Docker auto-discovery and container selection behavior</li><li>the current CLI surface, including traces, projects, status actions, and update flow</li><li>the current UI surface, including Issues, Traces, Settings, Deep Analysis, and keyboard shortcuts</li><li>OTLP/HTTP trace ingestion and the <code>sentinel.session_id</code> correlation contract</li></ul><h2 id=documentation-map>Documentation map</h2><ul><li><a href=/docs/install/>Install Sentinel</a></li><li><a href=/docs/quickstart/>Run the quick start</a></li><li><a href=/docs/docker/>Use Docker mode</a></li><li><a href=/docs/dev/>Run a supervised dev stack</a></li><li><a href=/docs/commands/>Browse command workflows</a></li><li><a href=/docs/ui/>Use the local UI</a></li><li><a href=/docs/otel/>Configure OpenTelemetry</a></li><li><a href=/docs/projects/>Scope work by project</a></li><li><a href=/docs/troubleshooting/>Troubleshoot common failures</a></li><li><a href=/docs/reference/>Use the full reference</a></li></ul><h2 id=core-workflow>Core workflow</h2><p>For most local development setups, pick one of these as your entry point:</p><ol><li><a href=/docs/install/>Install Sentinel</a></li><li>Pick the right ingestion mode:<ul><li><code>sentinel dev</code> if you have (or want) a <code>.sentinel.yml</code> for your local stack</li><li><code>sentinel docker</code> if you run your stack with Docker or Compose</li><li><code>sentinel run -- &lt;command></code> to wrap a single process you start yourself</li><li><code>sentinel stdin</code> or <code>sentinel watch &lt;glob></code> if logs already exist somewhere</li></ul></li><li>Open <code>sentinel ui</code> to inspect grouped issues, traces, and triage reports</li><li>Reach for the <a href=/docs/reference/ui/>UI reference</a> and <a href=/docs/reference/cli/>CLI reference</a> when you want exact behavior</li></ol></div><section class=card-grid aria-label="Documentation sections"><a class=doc-card href=/docs/install/><span class=doc-card-kicker>Install</span>
 <strong>Install</strong>
 <span>Get Sentinel running in one command and understand how upgrades work after the initial install.</span>
 </a><a class=doc-card href=/docs/quickstart/><span class=doc-card-kicker>Quick Start</span>
 <strong>Quick Start</strong>
-<span>Start triaging local failures in a few minutes with the three main ingestion paths.</span>
+<span>Start triaging local failures in a few minutes. Pick the ingestion path that matches how you run your stack today.</span>
 </a><a class=doc-card href=/docs/docker/><span class=doc-card-kicker>Docker</span>
 <strong>Docker</strong>
 <span>Use Sentinel directly against Docker logs and understand exactly what it is or is not watching.</span>
+</a><a class=doc-card href=/docs/dev/><span class=doc-card-kicker>Dev</span>
+<strong>Dev</strong>
+<span>Run a supervised local stack with sentinel dev: a config file, a terminal UI, and per-service start, stop, restart, and copy-log controls.</span>
 </a><a class=doc-card href=/docs/commands/><span class=doc-card-kicker>Commands</span>
 <strong>Commands</strong>
 <span>Workflow-oriented guide to the main Sentinel commands, with links to the full CLI reference.</span>
+</a><a class=doc-card href=/docs/projects/><span class=doc-card-kicker>Projects</span>
+<strong>Projects</strong>
+<span>How Sentinel scopes issues, traces, and analysis by project, and how the UI and CLI behave when more than one project shares a database.</span>
 </a><a class=doc-card href=/docs/ui/><span class=doc-card-kicker>UI</span>
 <strong>UI</strong>
 <span>Overview of the local Sentinel UI: issues, traces, settings, detail pages, and keyboard-first navigation.</span>
 </a><a class=doc-card href=/docs/otel/><span class=doc-card-kicker>OpenTelemetry</span>
 <strong>OpenTelemetry</strong>
 <span>How Sentinel ingests local OTLP/HTTP traces, what metadata it stores, and how trace correlation works.</span>
+</a><a class=doc-card href=/docs/troubleshooting/><span class=doc-card-kicker>Troubleshooting</span>
+<strong>Troubleshooting</strong>
+<span>Common Sentinel failures and how to fix them. Group: dev config, Docker, OTLP, LLM/model, database, UI, and live reload.</span>
 </a><a class=doc-card href=/docs/reference/><span class=doc-card-kicker>Reference</span>
 <strong>Reference</strong>
 <span>Command and UI reference for the current public Sentinel surface.</span></a></section></article></main><aside class=page-toc><div class=page-toc-inner><p class=toc-title>On This Page</p><nav id=TableOfContents><ul><li><a href=#what-these-docs-cover>What these docs cover</a></li><li><a href=#documentation-map>Documentation map</a></li><li><a href=#core-workflow>Core workflow</a></li></ul></nav></div></aside></div><script src=/docs/docs.js defer></script></body></html>

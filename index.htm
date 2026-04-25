@@ -6,7 +6,7 @@
     <title>Sentinel — Error tracking that works with your existing logs</title>
     <meta
       name="description"
-      content="Sentinel reads your stdout and stderr. No SDK, no instrumentation, no cloud. Pipe your logs in — it groups, deduplicates, and triages every error across all your services."
+      content="Sentinel reads stdout, stderr, files, Docker logs, and supervised dev stack logs. Log ingestion needs no SDK; Sentinel groups, deduplicates, and triages errors with local-first storage."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -374,6 +374,116 @@
         pointer-events: none;
       }
 
+      .dev-tui {
+        color: #c9d1d9;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .dev-tui-header,
+      .dev-tui-metrics,
+      .dev-tui-tabs {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+      }
+
+      .dev-tui-header {
+        margin-bottom: 0.15rem;
+      }
+
+      .dev-tui-title {
+        color: #fff7b3;
+        background: #5450d8;
+        padding: 0 0.45rem;
+        font-weight: 600;
+      }
+
+      .dev-tui-label {
+        color: #8b949e;
+      }
+
+      .dev-tui-metrics {
+        margin-bottom: 0.25rem;
+      }
+
+      .dev-tui-main {
+        display: grid;
+        grid-template-columns: 12.5rem 1fr;
+        gap: 1.15rem;
+        min-height: 21rem;
+      }
+
+      .dev-tui-services {
+        border-right: 1px solid rgba(139, 148, 158, 0.35);
+        padding-right: 1rem;
+      }
+
+      .dev-tui-section {
+        color: #c9d1d9;
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+      }
+
+      .dev-tui-service-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+      }
+
+      .dev-tui-selected {
+        background: #5450d8;
+        color: #fff7b3;
+        padding: 0 0.2rem;
+        margin-left: -0.2rem;
+        width: fit-content;
+      }
+
+      .dev-tui-logs {
+        min-width: 0;
+      }
+
+      .dev-tui-tabs {
+        margin-bottom: 1.15rem;
+      }
+
+      .dev-tui-log-lines {
+        overflow: hidden;
+      }
+
+      .dev-tui-log-line {
+        color: #c9d1d9;
+      }
+
+      .dev-tui-log-line span {
+        color: #8b949e;
+      }
+
+      .dev-tui-footer {
+        display: flex;
+        align-items: baseline;
+        gap: 0.8rem;
+        margin-top: 0.75rem;
+        color: #6e7681;
+        overflow: hidden;
+      }
+
+      .dev-tui-footer-item {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.25rem;
+        flex: 0 0 auto;
+      }
+
+      .dev-tui-key {
+        color: #79c0ff;
+        font-weight: 600;
+      }
+
+      .dev-tui-action {
+        color: #8b949e;
+      }
+
       .t-prompt {
         color: #667186;
       }
@@ -721,6 +831,10 @@
         padding: 1.75rem;
       }
 
+      .mode-featured {
+        grid-column: 1 / -1;
+      }
+
       .mode-tag {
         font-family: var(--mono);
         font-size: 0.6875rem;
@@ -1021,16 +1135,15 @@
     <!-- HERO -->
     <div class="hero">
       <div class="hero-inner">
-        <div class="badge">
-          MIT License · Single Binary · No Instrumentation
-        </div>
+        <div class="badge">MIT License · Single Binary · Local-first</div>
 
         <h1>Stop watching logs.<br />Start <em>fixing errors</em>.</h1>
 
         <p class="hero-sub">
-          Read stdout, stderr, files, or Docker logs. Inspect grouped failures
-          in a local UI and fix what keeps resurfacing. No SDK. No code changes.
-          No cloud.
+          Read stdout, stderr, files, Docker logs, or a supervised local dev
+          stack. Inspect grouped failures in a local UI, and use
+          <code>sentinel dev</code> to stop, restart, and copy logs for a single
+          service. No SDK is required for log ingestion.
         </p>
 
         <div class="hero-ctas">
@@ -1044,69 +1157,147 @@
             <div class="dot dot-red"></div>
             <div class="dot dot-yellow"></div>
             <div class="dot dot-green"></div>
-            <div class="terminal-title">bash</div>
+            <div class="terminal-title">sentinel dev</div>
           </div>
           <div class="terminal-body">
-            <div class="t-line">
-              <span class="t-prompt">$</span>
-              <span class="t-cmd">sentinel docker</span>
-            </div>
-            <div class="t-line spacer">
-              <span class="t-green">✓</span>
-              <span class="t-muted"
-                >compose stack detected · watching 3 containers</span
-              >
-            </div>
-            <div class="t-line spacer">
-              <span class="t-red">●</span>
-              <span class="t-cmd">error</span>
-              <span class="t-muted"
-                >TypeError: Cannot read properties of undefined (reading
-                'id')</span
-              >
-            </div>
-            <div class="t-line">
-              <span class="t-dim">│</span>
-              <span class="t-dim"
-                >fingerprint a4f1b2c · 3rd occurrence · last seen 2m ago</span
-              >
-            </div>
-            <div class="t-line">
-              <span class="t-dim">│</span>
-              <span class="t-muted"
-                >triage: null check missing on req.body.user in auth
-                handler</span
-              >
-            </div>
-            <div class="t-line spacer">
-              <span class="t-amber">●</span>
-              <span class="t-cmd">warn</span>
-              <span class="t-muted"
-                >Database pool exhausted (14/15 connections)</span
-              >
-            </div>
-            <div class="t-line">
-              <span class="t-dim">│</span>
-              <span class="t-dim"
-                >fingerprint 9c3d7e2 · new issue · first seen now</span
-              >
-            </div>
-            <div class="t-line">
-              <span class="t-dim">│</span>
-              <span class="t-muted"
-                >triage: connection leak likely — check for unclosed
-                queries</span
-              >
-            </div>
-            <div class="t-line spacer">
-              <span class="t-prompt">$</span>
-              <span class="t-cmd">sentinel ui</span>
-            </div>
-            <div class="t-line">
-              <span class="t-green">✓</span>
-              <span class="t-muted">dashboard → </span
-              ><span class="t-blue">http://localhost:4040</span>
-              <span class="cursor" aria-hidden="true"></span>
+            <div class="dev-tui" aria-label="Sentinel dev terminal UI preview">
+              <div class="dev-tui-header">
+                <span class="dev-tui-title">Sentinel Dev</span>
+                <span class="dev-tui-label">group</span>
+                <span class="t-blue">default</span>
+                <span class="dev-tui-label">running</span>
+                <span class="t-green">8/8</span>
+                <span class="dev-tui-label">issues</span>
+                <span class="t-red">313</span>
+                <span class="dev-tui-label">occurrences</span>
+                <span class="t-blue">13783</span>
+              </div>
+              <div class="dev-tui-metrics">
+                <span class="dev-tui-label">Metrics</span>
+                <span class="t-cmd">all services</span>
+                <span class="t-amber">CPU 1.3%</span>
+                <span class="t-muted">............</span>
+                <span class="t-blue">MEM 2.2 GiB 3.4%</span>
+                <span class="t-muted">............</span>
+              </div>
+              <div class="dev-tui-main">
+                <div class="dev-tui-services">
+                  <div class="dev-tui-section">Services</div>
+                  <div class="dev-tui-service-row">
+                    <span class="dev-tui-selected">All</span>
+                    <span class="t-blue">8</span>
+                  </div>
+                  <div class="dev-tui-service-row">
+                    <span>postgres</span>
+                    <span class="t-green">running</span>
+                  </div>
+                  <div class="dev-tui-service-row">
+                    <span>qdrant</span>
+                    <span class="t-green">running</span>
+                  </div>
+                  <div class="dev-tui-service-row">
+                    <span>redis</span>
+                    <span class="t-green">running</span>
+                  </div>
+                  <div class="dev-tui-service-row">
+                    <span>redis-insight</span>
+                    <span class="t-green">running</span>
+                  </div>
+                  <div class="dev-tui-service-row">
+                    <span>backend</span>
+                    <span class="t-green">running</span>
+                  </div>
+                  <div class="dev-tui-service-row">
+                    <span>workers</span>
+                    <span class="t-green">running</span>
+                  </div>
+                  <div class="dev-tui-service-row">
+                    <span>beat</span>
+                    <span class="t-green">running</span>
+                  </div>
+                  <div class="dev-tui-service-row">
+                    <span>frontend</span>
+                    <span class="t-green">running</span>
+                  </div>
+                </div>
+                <div class="dev-tui-logs">
+                  <div class="dev-tui-tabs">
+                    <span class="t-cmd">Logs</span>
+                    <span class="dev-tui-label">stream</span>
+                    <span class="t-blue">all services</span>
+                    <span class="dev-tui-label">mode</span>
+                    <span class="t-green">follow</span>
+                  </div>
+                  <div class="dev-tui-log-lines">
+                    <div class="dev-tui-log-line">
+                      <span>[qdrant]</span>
+                      2026-04-25T13:22:28.434332Z INFO collection::shards::local_shard: Recovering shard ./storage/collections/mem0_widget
+                    </div>
+                    <div class="dev-tui-log-line">
+                      <span>[qdrant]</span>
+                      2026-04-25T13:22:28.446102Z INFO collection::shards::local_shard: Recovered collection mem0_widget_d8754963e70e4d6bbffa: 1/1 (100%)
+                    </div>
+                    <div class="dev-tui-log-line">
+                      <span>[qdrant]</span>
+                      2026-04-25T13:22:28.447287Z INFO storage::content_manager::toc: Loading collection: mem0_widget_8260da14dbb541bcba1c
+                    </div>
+                    <div class="dev-tui-log-line">
+                      <span>[qdrant]</span>
+                      2026-04-25T13:22:28.545444Z INFO collection::shards::local_shard: Recovering shard ./storage/collections/mem0_widget_8260da14dbb541bcba1c
+                    </div>
+                    <div class="dev-tui-log-line">
+                      <span>[qdrant]</span>
+                      2026-04-25T13:22:28.557517Z INFO collection::shards::local_shard: Recovered collection mem0_widget_8260da14dbb541bcba1c: 1/1 (100%)
+                    </div>
+                    <div class="dev-tui-log-line">
+                      <span>[qdrant]</span>
+                      2026-04-25T13:22:28.558970Z INFO storage::content_manager::toc: Loading collection: mem0_user_d6fe8d1b-38c7-45eb-99c8-c9b186787165
+                    </div>
+                    <div class="dev-tui-log-line">
+                      <span>[qdrant]</span>
+                      2026-04-25T13:22:28.655132Z INFO collection::shards::local_shard: Recovering shard ./storage/collections/mem0_user_d6fe8d1b
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="dev-tui-footer" aria-label="Sentinel dev keyboard shortcuts">
+                <span class="dev-tui-footer-item"
+                  ><span class="dev-tui-key">j/k</span
+                  ><span class="dev-tui-action">move</span></span
+                >
+                <span class="dev-tui-footer-item"
+                  ><span class="dev-tui-key">a</span
+                  ><span class="dev-tui-action">all</span></span
+                >
+                <span class="dev-tui-footer-item"
+                  ><span class="dev-tui-key">m</span
+                  ><span class="dev-tui-action">metrics</span></span
+                >
+                <span class="dev-tui-footer-item"
+                  ><span class="dev-tui-key">p</span
+                  ><span class="dev-tui-action">pause</span></span
+                >
+                <span class="dev-tui-footer-item"
+                  ><span class="dev-tui-key">f</span
+                  ><span class="dev-tui-action">follow</span></span
+                >
+                <span class="dev-tui-footer-item"
+                  ><span class="dev-tui-key">/</span
+                  ><span class="dev-tui-action">search</span></span
+                >
+                <span class="dev-tui-footer-item"
+                  ><span class="dev-tui-key">o</span
+                  ><span class="dev-tui-action">web</span></span
+                >
+                <span class="dev-tui-footer-item"
+                  ><span class="dev-tui-key">?</span
+                  ><span class="dev-tui-action">help</span></span
+                >
+                <span class="dev-tui-footer-item"
+                  ><span class="dev-tui-key">q</span
+                  ><span class="dev-tui-action">quit</span></span
+                >
+              </div>
             </div>
           </div>
         </div>
@@ -1194,17 +1385,17 @@
       <div class="section-label">How it works</div>
       <h2>Pipe in. Get signal.</h2>
       <p class="section-intro">
-        Three steps. No account, no config file, no YAML.
+        Three steps. No account. Basic ingestion needs no config;
+        <code>.sentinel.yml</code> is only for the dev supervisor.
       </p>
       <div class="steps">
         <div class="step">
           <div class="step-num">01</div>
           <h3>Point it at your logs</h3>
           <p>
-            Pipe stdin, tail files with
-            <code>sentinel watch ./logs/*.log</code>, or wrap a process with
-            <code>sentinel run -- your_command</code>. Sentinel reads whatever
-            your app already emits.
+            Run a stack with <code>sentinel dev</code>, wrap one process with
+            <code>sentinel run -- your_command</code>, tail files, watch Docker,
+            or pipe stdin. Sentinel reads whatever your app already emits.
           </p>
         </div>
         <div class="step">
@@ -1221,8 +1412,9 @@
           <h3>Triage and track</h3>
           <p>
             Each new fingerprint is triaged — heuristically offline, or via a
-            local LLM if you have Ollama running. Mark issues as investigating,
-            resolved, or suppressed. Regressions are auto-flagged.
+            local or remote OpenAI-compatible endpoint when enabled. Mark issues
+            as investigating, resolved, or suppressed. Regressions are
+            auto-flagged.
           </p>
         </div>
       </div>
@@ -1232,8 +1424,21 @@
     <section class="modes-section container">
       <div class="section-label">Ingestion modes</div>
       <h2>Works wherever your logs live</h2>
-      <p class="section-intro">Four ingestion modes, one binary.</p>
+      <p class="section-intro">Five workflows, one binary.</p>
       <div class="modes-grid">
+        <div class="mode mode-featured">
+          <div class="mode-tag">dev</div>
+          <h3>Run a supervised local stack</h3>
+          <p>
+            <code>sentinel dev</code> starts or attaches to services from
+            <code>.sentinel.yml</code>, tails their logs, shows a terminal UI,
+            tracks metrics, and lets you stop, restart, or copy logs for one
+            service.
+          </p>
+          <div class="mode-cmd">
+            <span class="prompt">$ </span><span class="cmd">sentinel dev</span>
+          </div>
+        </div>
         <div class="mode">
           <div class="mode-tag">stdin</div>
           <h3>Pipe from anything</h3>
@@ -1250,8 +1455,8 @@
           <div class="mode-tag">watch</div>
           <h3>Tail log files</h3>
           <p>
-            Glob patterns, seek-based offset tracking, and automatic rotation
-            detection for file-based logs.
+            Glob patterns, seek-based offset tracking, and truncation handling
+            for file-based logs.
           </p>
           <div class="mode-cmd">
             <span class="prompt">$ </span
@@ -1351,18 +1556,19 @@
           <div class="feature-icon">otlp</div>
           <h3>OTLP trace correlation</h3>
           <p>
-            Built-in OpenTelemetry HTTP receiver. Traces are correlated with
-            error events and shown as a span waterfall in the UI — no external
-            collector needed.
+            Built-in OpenTelemetry HTTP receiver. Send spans from your existing
+            OpenTelemetry setup, correlate traces with errors, and inspect the
+            waterfall in the UI without running a separate collector.
           </p>
         </div>
         <div class="feature">
           <div class="feature-icon">local-first</div>
-          <h3>Everything stays local</h3>
+          <h3>Local-first storage</h3>
           <p>
-            SQLite with WAL mode. API keys encrypted with AES-256-GCM. Data
-            never leaves your machine. Self-update pulls from GitHub with
-            SHA-256 checksum verification.
+            Logs and state live in SQLite with WAL mode. API keys are encrypted
+            with AES-256-GCM. Offline mode or a local LLM keeps analysis local;
+            remote LLM mode sends triage requests only to your configured
+            endpoint.
           </p>
         </div>
       </div>
@@ -1377,11 +1583,12 @@
         your PATH and it works.
       </p>
       <div class="stack-row">
-        <div class="stack-item">Go 1.23 <span>language</span></div>
+        <div class="stack-item">Go 1.24 <span>language</span></div>
         <div class="stack-item">SQLite + WAL <span>storage</span></div>
         <div class="stack-item">Pure Go SQLite <span>no CGO</span></div>
         <div class="stack-item">Cobra <span>CLI</span></div>
-        <div class="stack-item">oat.ink <span>UI library</span></div>
+        <div class="stack-item">Bubble Tea <span>dev TUI</span></div>
+        <div class="stack-item">oat.ink <span>web UI</span></div>
         <div class="stack-item">go:embed <span>web UI</span></div>
         <div class="stack-item">OpenTelemetry <span>traces</span></div>
         <div class="stack-item">AES-256-GCM <span>secrets</span></div>
@@ -1395,8 +1602,8 @@
     <section class="cta-section container">
       <h2>Install once. Use it everywhere.</h2>
       <p>
-        One command to install. One binary to wrap your dev server, tail files,
-        or watch Docker logs.
+        One command to install. One binary to run your dev stack, wrap a
+        process, tail files, or watch Docker logs.
       </p>
 
       <div class="cta-install">
@@ -1406,7 +1613,7 @@
       </div>
 
       <div class="cta-note">
-        Then run: <code>sentinel run -- your_command</code>
+        Then run: <code>sentinel dev</code>
       </div>
 
       <div class="cta-buttons">
